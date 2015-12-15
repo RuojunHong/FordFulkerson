@@ -11,7 +11,8 @@ public class Node {
 	private String label;
 	private List<Edge> edges;
 	private boolean isVisited = false;
-	private Pixel p;
+	private boolean isFlagged = false;
+	private int flag = 0;
 	
 	public Node(String label) {
 		this.label = label;
@@ -62,6 +63,16 @@ public class Node {
 
 	public String toString() {
 		return this.label;
+	}
+	public void flag(int i){
+		this.flag=i;
+		this.isFlagged=true;
+	}
+	public int getFlag(){
+		return this.flag;
+	}
+	public boolean isFlagged(){
+		return this.isFlagged;
 	}
 	
 }

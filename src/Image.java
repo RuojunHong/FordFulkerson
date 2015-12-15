@@ -1,7 +1,10 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -11,13 +14,13 @@ public class Image {
 	BufferedImage img;
 	int[][] intensityMatrix;
 	int lamda = 0;
-	int meanSource = 0;
-	int meanSink = 0;
-	
-	public Image(){
-		
+
+	public Image() {
+
 	}
-	public Image(String fileName,int lamda,int meanSource, int meanSink) throws IOException {
+
+	public Image(String fileName, int lamda)
+			throws IOException {
 		try {
 			img = ImageIO.read(new File(fileName));
 			this.intensityMatrix = new int[img.getWidth()][img.getHeight()];
@@ -33,64 +36,96 @@ public class Image {
 		} catch (IOException e) {
 			System.out.println(fileName + " doesn't exist.");
 		}
-		this.lamda=lamda;
-		this.meanSource=meanSource;
-		this.meanSink = meanSink;
+		this.lamda = lamda;
 	}
 
 	public void writeToFile(String filename) throws IOException {
 		PrintWriter pw = new PrintWriter(filename);
-		for(int i = 0;i<this.intensityMatrix.length;i++){
-			for(int j=0;j<this.intensityMatrix[0].length;j++){
-					pw.println("s "+i+"_"+j+" "+Math.pow((this.intensityMatrix[i][j]-this.meanSource),2));
-					pw.println(i+"_"+j+" t "+Math.pow((this.intensityMatrix[i][j]-this.meanSink),2));
+		for (int i = 0; i < this.intensityMatrix.length; i++) {
+			for (int j = 0; j < this.intensityMatrix[0].length; j++) {
+				pw.println("s "
+						+ i
+						+ "_"
+						+ j
+						+ " "
+						+ Math.abs(
+								this.intensityMatrix[i][j] - 255)
+								);
+				pw.println(i
+						+ "_"
+						+ j
+						+ " t "
+						+ Math.abs(
+								this.intensityMatrix[i][j] - 0));
 			}
 		}
-		
-		for(int i = 0;i<this.intensityMatrix.length;i++){
-			for(int j = 0;j<this.intensityMatrix[0].length;j++){
-				try{
-				pw.println(i+"_"+j+" "+(i+1)+"_"+j+" "+lamda);
-				}catch(ArrayIndexOutOfBoundsException e){	
-				}
-				try{
-				pw.println(i+"_"+j+" "+(i-1)+"_"+j+" "+lamda);
-				}catch(ArrayIndexOutOfBoundsException e){	
-				}
-				try{
-				pw.println(i+"_"+j+" "+i+"_"+(j+1)+" "+lamda);
-				}catch(ArrayIndexOutOfBoundsException e){	
-				}
-				try{
-				pw.println(i+"_"+j+" "+i+"_"+(j-1)+" "+lamda);
-				}catch(ArrayIndexOutOfBoundsException e){	
-				}			}
+
+		for (int i = 1; i < this.intensityMatrix.length - 1; i++) {
+			for (int j = 1; j < this.intensityMatrix[0].length - 1; j++) {
+
+				pw.println(i + "_" + j + " " + (i + 1) + "_" + j + " " + lamda);
+
+				pw.println(i + "_" + j + " " + (i - 1) + "_" + j + " " + lamda);
+
+				pw.println(i + "_" + j + " " + i + "_" + (j + 1) + " " + lamda);
+
+				pw.println(i + "_" + j + " " + i + "_" + (j - 1) + " " + lamda);
+			}
 		}
 		pw.close();
 	}
 
-	public void drawImage(int[][] newIntensityMatrix) throws IOException {
+	public void drawBinaryImage(String fileName) throws IOException {
+
+		boolean[][] matrix = new boolean[this.img.getWidth()][this.img
+				.getHeight()];
+		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+
+			String sCurrentLine;
+
+			while ((sCurrentLine = br.readLine()) != null) {
+				String[] str = sCurrentLine.split(" ");
+				try {
+					if (Integer.parseInt(str[2]) == 0)
+						matrix[Integer.parseInt(str[0])][Integer
+								.parseInt(str[1])] = true;
+					else
+						matrix[Integer.parseInt(str[1])][Integer
+								.parseInt(str[1])] = false;
+				} catch (java.lang.ArrayIndexOutOfBoundsException aiobe) {
+
+				}
+			}
+
+		} catch (IOException e) {
+			System.out.println("No such file.");
+			return;
+		}
 		BufferedImage newImg = new BufferedImage(img.getWidth(),
 				img.getHeight(), BufferedImage.TYPE_INT_RGB);
 		for (int i = 0; i < newImg.getWidth(); i++) {
 			for (int j = 0; j < newImg.getHeight(); j++) {
-				int rgb = ((newIntensityMatrix[i][j] & 0x0ff) << 16)
-						| ((newIntensityMatrix[i][j] & 0x0ff) << 8)
-						| (newIntensityMatrix[i][j] & 0x0ff);
-				newImg.setRGB(newImg.getWidth()-i-1, j, rgb);
+
+				int rgb = this.img.getRGB(i, j);
+
+				if (matrix[i][j]) {
+					newImg.setRGB(i, j, Color.white.getRGB());
+				} else {
+					newImg.setRGB(i, j, Color.black.getRGB());
+				}
+
 			}
 		}
-		File outputfile = new File("testFlipped.jpg");
+		File outputfile = new File("imageFinished.jpg");
 		ImageIO.write(newImg, "jpg", outputfile);
 	}
-	
-	
+
 	public static void main(String[] args) throws Exception {
-		Image i = new Image("test.jpg",20,10,250);
-		i.drawImage(i.intensityMatrix);
-		i.writeToFile("test.txt");
-		FordFulkerson f = new FordFulkerson("test.txt");
+		Image i = new Image(args[0], Integer.parseInt(args[1]));
+		i.writeToFile("graph.txt");
+		FordFulkerson f = new FordFulkerson("graph.txt");
 		f.run("s", "t");
-		//f.displayDotFile();
+		f.flagNodesToFile("output.txt");
+		i.drawBinaryImage("output.txt");
 	}
 }

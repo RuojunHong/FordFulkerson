@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.List;
 
 public class FordFulkerson {
@@ -69,6 +70,7 @@ public class FordFulkerson {
 		}
 		return bottleNeck;
 	}
+
 	/**
 	 * 
 	 * @throws FileNotFoundException
@@ -83,18 +85,38 @@ public class FordFulkerson {
 		Node t = residual.getLookUp().get(dest);
 		while (this.residual.hasPath(s, t)) {
 			this.pushFlow(s, t);
-			//this.pushFlow(s, t);
+			// this.pushFlow(s, t);
 		}
-		System.out.println("Algrithm finished. max flow = "+this.maxFlow);
+		System.out.println("Algrithm finished. max flow = " + this.maxFlow);
+	}
+
+	public void flagNodesToFile(String filename) throws FileNotFoundException {
+		this.residual.getNodes().remove(this.residual.getLookUp().get("s"));
+		this.residual.getNodes().remove(this.residual.getLookUp().get("t"));
+		for (Node n : this.residual.getNodes()) {
+			for (Edge e : n.getEdges()) {
+				if (e.isReverse) {
+					if(!n.isFlagged()){
+					n.flag(0);
+					e.getDest().flag(1);
+					
+				}
+				}
+			}
+		}
+		PrintWriter pw = new PrintWriter(filename);
+		for (Node n : this.residual.getNodes()) {
+			String[] str = n.getLabel().split("_");
+			pw.println(str[0] + " " + str[1] + " " + n.getFlag());
+		}
+		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		FordFulkerson f = new FordFulkerson("graph");
-
 		f.run("s", "t");
-		
-		f.displayDotFile();
+
 	}
 
 }

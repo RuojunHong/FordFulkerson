@@ -86,49 +86,7 @@ public class Graph {
 		this.nodes.remove(n);
 	}
 
-	/**
-	 * deletion of individual villages. After the deletion:
-	 * 
-	 * (1)any roads that went through the village's route to other villages are
-	 * direct (2)Roads cost are summed up
-	 * 
-	 * @param label
-	 * @return
-	 */
-	public Node removeNode(String label) {
-		Node temp = lookup.get(label);
-
-		if (temp.getEdges().isEmpty()) {
-			// remove all the edges to temp
-			for (Node n : nodes) {
-				n.removeEdge(temp);
-			}
-		} else {
-			// Create temporary list for backup
-			List<Node> tempDests = new ArrayList<Node>();
-			List<Double> tempCosts = new ArrayList<Double>();
-			for (Edge e : temp.getEdges()) {
-				tempDests.add(e.getDest());
-				tempCosts.add(e.getCost());
-			}
-			for (Node n : nodes) {
-				if (n.contains(temp)) {
-					double tempcost = n.removeEdge(temp).getCost();
-					for (int i = 0; i < tempDests.size(); i++) {
-						// add the integrated road with updated(sum) cost
-						addEdge(n.getLabel(), tempDests.get(i).getLabel(),
-								tempCosts.get(i) + tempcost);
-					}
-				}
-			}
-		}
-		nodes.remove(temp);
-		// update the indegree
-		System.out.println("Removed node " + temp.getLabel() + ".");
-		return temp;
-
-	}
-
+	
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 
