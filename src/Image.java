@@ -30,7 +30,6 @@ public class Image {
 					int rgb = img.getRGB(i, j);
 					int intensity = (rgb) & 0xff;
 					this.intensityMatrix[i][j] = intensity;
-					System.out.println("pixel: " + intensity);
 				}
 			}
 		} catch (IOException e) {
@@ -116,7 +115,7 @@ public class Image {
 
 			}
 		}
-		File outputfile = new File("imageFinished.jpg");
+		File outputfile = new File("output.jpg");
 		ImageIO.write(newImg, "jpg", outputfile);
 	}
 
