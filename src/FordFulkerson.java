@@ -114,8 +114,8 @@ public class FordFulkerson {
 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		FordFulkerson f = new FordFulkerson(args[0]);
-		f.run("s", "t");
+		FordFulkerson f = new FordFulkerson("graph");
+		f.run("0", "5");
 
 	}
 

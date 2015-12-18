@@ -120,7 +120,7 @@ public class Image {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Image i = new Image(args[0], Integer.parseInt(args[1]));
+		Image i = new Image("test.jpg",500);
 		i.writeToFile("graph.txt");
 		FordFulkerson f = new FordFulkerson("graph.txt");
 		f.run("s", "t");
